@@ -1,0 +1,34 @@
+Caught panic:
+
+runtime error: invalid memory address or nil pointer dereference
+
+Restoring terminal...
+
+goroutine 1 [running]:
+runtime/debug.Stack()
+	/usr/lib/go/src/runtime/debug/stack.go:26 +0x5e
+runtime/debug.PrintStack()
+	/usr/lib/go/src/runtime/debug/stack.go:18 +0x13
+github.com/charmbracelet/bubbletea.(*Program).recoverFromPanic(0xc0000c83c0, {0x6d1960, 0x8f3170})
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:810 +0xac
+github.com/charmbracelet/bubbletea.(*Program).Run.func2()
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:601 +0xe8
+panic({0x6d1960?, 0x8f3170?})
+	/usr/lib/go/src/runtime/panic.go:792 +0x132
+github.com/charmbracelet/bubbles/list.(*Model).updatePagination(0xc0002d4cd8)
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbles@v0.21.0/list/list.go:788 +0x22a
+github.com/charmbracelet/bubbles/list.(*Model).setSize(0xc0002d4cd8, 0x13d, 0x44)
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbles@v0.21.0/list/list.go:698 +0x171
+github.com/charmbracelet/bubbles/list.(*Model).SetSize(...)
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbles@v0.21.0/list/list.go:678
+github.com/Ceinl/Go-dashboard/internal/generalView.SwapWorkspaceView.Update({0x13f, 0x48, 0x0, {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, {0x0, ...}, ...}}, ...)
+	/home/cein/code/Go-dashboard/internal/generalView/swapWorkspaceView.go:82 +0x2e5
+main.model.Update({0x0, {0x0, 0x0, 0x0}, {{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0, ...}, ...}, ...}, ...)
+	/home/cein/code/Go-dashboard/main.go:79 +0xabd
+github.com/charmbracelet/bubbletea.(*Program).eventLoop(0xc0000c83c0, {0x785e20?, 0xc000200000?}, 0xc000088230)
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:525 +0x7d7
+github.com/charmbracelet/bubbletea.(*Program).Run(0xc0000c83c0)
+	/home/cein/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:679 +0xb56
+main.main()
+	/home/cein/code/Go-dashboard/main.go:182 +0x199
+exit status 1

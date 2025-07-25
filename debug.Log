@@ -5,3 +5,20 @@ debug 2025/07/25 20:47:38 program was killed: program experienced a panic
 debug 2025/07/25 20:49:55 program was killed: program experienced a panic
 debug 2025/07/25 20:50:59 program was killed: program experienced a panic
 debug 2025/07/25 20:52:17 program was killed: program experienced a panic
+debug 2025/07/25 22:04:05 program was killed: program experienced a panic
+debug 2025/07/25 22:14:09 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 22:14:27 program was killed: program experienced a panic
+debug 2025/07/25 22:14:49 program was killed: program experienced a panic
+debug 2025/07/25 22:16:40 program was killed: program experienced a panic
+debug 2025/07/25 22:16:59 program was killed: program experienced a panic
+debug 2025/07/25 22:17:08 program was killed: program experienced a panic
+debug 2025/07/25 23:03:15 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:24:09 program was killed: program experienced a panic
+debug 2025/07/25 23:24:14 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:24:26 program was killed: program experienced a panic
+debug 2025/07/25 23:25:17 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:25:22 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:26:33 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:27:36 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 23:27:44 program was killed: program experienced a panic
+debug 2025/07/25 23:28:46 program was killed: program experienced a panic

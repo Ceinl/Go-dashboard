@@ -31,13 +31,16 @@ func (p ProjectBar) View() string {
 // ─────────────────────────────────────────────
 
 type StatusBar struct {
-	Width       int
-	CommandMode bool
-	Command     string
+	Width           int
+	CommandMode     bool
+	Command         string
+	ActiveWorkspace string
 }
 
 // New message type for newWorkspace command
 type NewWorkspaceCommandMsg struct{}
+type DeleteWorkspaceCommandMsg struct{}
+type SwapWorkspaceCommandMsg struct{}
 
 func (s StatusBar) Init() tea.Cmd {
 	return nil
@@ -59,6 +62,10 @@ func (s StatusBar) Update(msg tea.Msg) (StatusBar, tea.Cmd) {
 					return s, tea.Quit
 				case "newWorkspace", "neww":
 					return s, func() tea.Msg { return NewWorkspaceCommandMsg{} }
+				case "deleteWorkspace", "delw":
+					return s, func() tea.Msg { return DeleteWorkspaceCommandMsg{} }
+				case "swapWorkspace", "swapw":
+					return s, func() tea.Msg { return SwapWorkspaceCommandMsg{} }
 				}
 			case tea.KeyEsc:
 				s.CommandMode = false
@@ -86,6 +93,13 @@ func (s StatusBar) View() string {
 	} else {
 		content = "StatusBar"
 	}
+
+	activeWorkspaceInfo := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("240")).
+		Background(lipgloss.Color("235")).
+		PaddingRight(1).
+		Render("Workspace: " + s.ActiveWorkspace)
+
 	style := lipgloss.NewStyle().
 		Width(s.Width).
 		Align(lipgloss.Left).
@@ -93,7 +107,7 @@ func (s StatusBar) View() string {
 		Foreground(lipgloss.Color("240")).
 		Background(lipgloss.Color("235"))
 
-	return style.Render(content)
+	return lipgloss.JoinHorizontal(lipgloss.Bottom, style.Render(content), activeWorkspaceInfo)
 }
 
 // ─────────────────────────────────────────────

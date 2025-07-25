@@ -6,6 +6,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type Workspace struct {
+	ID    string
+	Name  string
+	Color string
+}
+
 type Model struct {
 	projectBar ProjectBar
 	statusBar  StatusBar
