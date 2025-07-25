@@ -1,0 +1,7 @@
+debug 2025/07/25 18:23:40 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 19:51:19 program was killed: program experienced a panic
+debug 2025/07/25 20:14:57 could not open a new TTY: open /dev/tty: no such device or address
+debug 2025/07/25 20:47:38 program was killed: program experienced a panic
+debug 2025/07/25 20:49:55 program was killed: program experienced a panic
+debug 2025/07/25 20:50:59 program was killed: program experienced a panic
+debug 2025/07/25 20:52:17 program was killed: program experienced a panic
