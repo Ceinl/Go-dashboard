@@ -4,6 +4,7 @@ var availableModules = []string{
 	"linksaver",
 	"placeholder",
 	"kanban",
+	"twitter",
 	// "profile",
 }
 

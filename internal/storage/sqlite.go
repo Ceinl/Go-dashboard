@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -43,6 +44,12 @@ func InitDB(filepath string) (*sql.DB, error) {
 		project_id TEXT NOT NULL,
 		title TEXT,
 		status TEXT,
+		FOREIGN KEY(project_id) REFERENCES projects(id)
+	);
+	CREATE TABLE IF NOT EXISTS tweets (
+		id TEXT NOT NULL PRIMARY KEY,
+		project_id TEXT NOT NULL,
+		content TEXT,
 		FOREIGN KEY(project_id) REFERENCES projects(id)
 	);
 	`
@@ -355,6 +362,74 @@ func UpdateTask(db *sql.DB, task Task) error {
 
 func DeleteTask(db *sql.DB, id string) error {
 	stmt, err := db.Prepare("DELETE FROM tasks WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	return err
+}
+
+type Tweet struct {
+	ID        string
+	ProjectID string
+	Content   string
+}
+
+func (t Tweet) Title() string {
+	lines := strings.Split(t.Content, "\n")
+	if len(lines) > 0 {
+		return lines[0]
+	}
+	return ""
+}
+func (t Tweet) Description() string { return "" }
+func (t Tweet) FilterValue() string { return t.Content }
+
+func GetTweetsForProject(db *sql.DB, projectID string) ([]Tweet, error) {
+	rows, err := db.Query("SELECT id, project_id, content FROM tweets WHERE project_id = ?", projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tweets []Tweet
+	for rows.Next() {
+		var tweet Tweet
+		if err := rows.Scan(&tweet.ID, &tweet.ProjectID, &tweet.Content); err != nil {
+			return nil, err
+		}
+		tweets = append(tweets, tweet)
+	}
+
+	return tweets, nil
+}
+
+func CreateTweet(db *sql.DB, tweet Tweet) error {
+	stmt, err := db.Prepare("INSERT INTO tweets(id, project_id, content) VALUES(?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(tweet.ID, tweet.ProjectID, tweet.Content)
+	return err
+}
+
+func UpdateTweet(db *sql.DB, tweet Tweet) error {
+	stmt, err := db.Prepare("UPDATE tweets SET content = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(tweet.Content, tweet.ID)
+	return err
+}
+
+func DeleteTweet(db *sql.DB, id string) error {
+	stmt, err := db.Prepare("DELETE FROM tweets WHERE id = ?")
 	if err != nil {
 		return err
 	}

@@ -429,6 +429,8 @@ func (m *model) reloadActiveModules() tea.Cmd {
 				newModule = module.NewPlaceholder()
 			case "kanban":
 				newModule = module.NewKanban(m.db, m.currentProject.ID)
+			case "twitter":
+				newModule = module.NewTwitter(m.db, m.currentProject.ID)
 			}
 			if newModule != nil {
 				if m.width > 0 && m.height > 0 {
