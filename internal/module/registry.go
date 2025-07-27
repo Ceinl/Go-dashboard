@@ -3,8 +3,8 @@ package module
 var availableModules = []string{
 	"linksaver",
 	"placeholder",
+	"kanban",
 	// "profile",
-	// "kanban",
 }
 
 func GetAvailableModules() []string {

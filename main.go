@@ -58,8 +58,10 @@ type model struct {
 	projectBar *generalview.ProjectBar
 	statusBar  generalview.StatusBar
 	body       generalview.Body
-	width      int
-	height     int
+
+	sizeInitialized bool
+	width           int
+	height          int
 }
 
 func (m *model) Init() tea.Cmd {
@@ -84,7 +86,6 @@ func (m *model) Init() tea.Cmd {
 	}
 
 	m.reloadProjects()
-	moduleInitCmd := m.reloadActiveModules()
 
 	return tea.Batch(
 		m.projectBar.Init(),
@@ -93,7 +94,6 @@ func (m *model) Init() tea.Cmd {
 		m.createWorkspaceView.Init(),
 		m.deleteWorkspaceView.Init(),
 		m.swapWorkspaceView.Init(),
-		moduleInitCmd,
 	)
 }
 
@@ -110,6 +110,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+
+		if !m.sizeInitialized {
+			cmd = m.reloadActiveModules()
+			cmds = append(cmds, cmd)
+			m.sizeInitialized = true
+		}
+
 		m.projectBar, cmd = m.projectBar.Update(msg)
 		cmds = append(cmds, cmd)
 		m.statusBar, cmd = m.statusBar.Update(msg)
@@ -120,7 +127,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.swapWorkspaceView, _ = m.swapWorkspaceView.Update(msg)
 		m.createProjectView, _ = m.createProjectView.Update(msg)
 		if m.currentModule != nil {
-			m.currentModule, _ = m.currentModule.Update(msg)
+			m.currentModule, cmd = m.currentModule.Update(msg)
+			cmds = append(cmds, cmd)
 		}
 		return m, tea.Batch(cmds...)
 	case tea.KeyMsg:
@@ -322,7 +330,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
-	if m.height == 0 || m.width == 0 {
+	if !m.sizeInitialized {
 		return "Loading..."
 	}
 
@@ -405,7 +413,7 @@ func (m *model) reloadProjects() {
 }
 
 func (m *model) reloadActiveModules() tea.Cmd {
-	var initCmd tea.Cmd
+	var initCmds []tea.Cmd
 	m.activeModules = []module.Module{}
 	if m.currentWorkspace.ID != "" && m.currentProject.ID != "" {
 		moduleNames := strings.Split(m.currentWorkspace.ActiveModules, ",")
@@ -419,9 +427,17 @@ func (m *model) reloadActiveModules() tea.Cmd {
 				newModule = module.NewLinkSaver(m.db, m.currentProject.ID)
 			case "placeholder":
 				newModule = module.NewPlaceholder()
+			case "kanban":
+				newModule = module.NewKanban(m.db, m.currentProject.ID)
 			}
 			if newModule != nil {
+				if m.width > 0 && m.height > 0 {
+					var cmd tea.Cmd
+					newModule, cmd = newModule.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+					initCmds = append(initCmds, cmd)
+				}
 				m.activeModules = append(m.activeModules, newModule)
+				initCmds = append(initCmds, newModule.Init())
 			}
 		}
 	}
@@ -431,13 +447,10 @@ func (m *model) reloadActiveModules() tea.Cmd {
 			m.currentModuleIndex = 0
 		}
 		m.currentModule = m.activeModules[m.currentModuleIndex]
-		if m.currentModule != nil {
-			initCmd = m.currentModule.Init()
-		}
 	} else {
 		m.currentModule = nil
 	}
-	return initCmd
+	return tea.Batch(initCmds...)
 }
 
 func loadConfig() (AppConfig, error) {

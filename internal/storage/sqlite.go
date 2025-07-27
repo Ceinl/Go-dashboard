@@ -38,6 +38,13 @@ func InitDB(filepath string) (*sql.DB, error) {
 		url TEXT,
 		FOREIGN KEY(project_id) REFERENCES projects(id)
 	);
+	CREATE TABLE IF NOT EXISTS tasks (
+		id TEXT NOT NULL PRIMARY KEY,
+		project_id TEXT NOT NULL,
+		title TEXT,
+		status TEXT,
+		FOREIGN KEY(project_id) REFERENCES projects(id)
+	);
 	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -289,6 +296,65 @@ func CreateLink(db *sql.DB, link Link) error {
 
 func DeleteLink(db *sql.DB, id string) error {
 	stmt, err := db.Prepare("DELETE FROM links WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	return err
+}
+
+type Task struct {
+	ID        string
+	ProjectID string
+	Title     string
+	Status    string
+}
+
+func GetTasksForProject(db *sql.DB, projectID string) ([]Task, error) {
+	rows, err := db.Query("SELECT id, project_id, title, status FROM tasks WHERE project_id = ?", projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []Task
+	for rows.Next() {
+		var task Task
+		if err := rows.Scan(&task.ID, &task.ProjectID, &task.Title, &task.Status); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}
+
+func CreateTask(db *sql.DB, task Task) error {
+	stmt, err := db.Prepare("INSERT INTO tasks(id, project_id, title, status) VALUES(?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(task.ID, task.ProjectID, task.Title, task.Status)
+	return err
+}
+
+func UpdateTask(db *sql.DB, task Task) error {
+	stmt, err := db.Prepare("UPDATE tasks SET title = ?, status = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(task.Title, task.Status, task.ID)
+	return err
+}
+
+func DeleteTask(db *sql.DB, id string) error {
+	stmt, err := db.Prepare("DELETE FROM tasks WHERE id = ?")
 	if err != nil {
 		return err
 	}
