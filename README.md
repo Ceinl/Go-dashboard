@@ -47,6 +47,10 @@ Select the tools you want to use in the current workspace.
 
 All your data is saved automatically as you work.
 
+## Demo Video
+
+[Link to YouTube Demo](https://www.youtube.com/watch?v=fAIZFVltWd0)
+
 ## Features
 
 - **Link Saver**: A bookmarking module.
