@@ -1,12 +1,12 @@
 package generalview
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Ceinl/Go-dashboard/internal/module"
 	"github.com/Ceinl/Go-dashboard/internal/storage"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type WorkspaceModuleSelectorView struct {
@@ -78,9 +78,9 @@ func (v WorkspaceModuleSelectorView) View() string {
 	s.WriteString("Select active modules for this workspace (press space to toggle, enter to save):\n\n")
 
 	for i, module := range v.availableModules {
-		cursor := " "
+		cursor := "  " // Two spaces for alignment
 		if v.cursor == i {
-			cursor = ">"
+			cursor = "> "
 		}
 
 		checked := " "
@@ -88,7 +88,9 @@ func (v WorkspaceModuleSelectorView) View() string {
 			checked = "x"
 		}
 
-		s.WriteString(lipgloss.JoinHorizontal(lipgloss.Left, cursor, " [", checked, "] ", module, "\n"))
+		// Use fmt.Sprintf for clearer and more reliable line construction
+		line := fmt.Sprintf("%s[%s] %s\n", cursor, checked, module)
+		s.WriteString(line)
 	}
 
 	return s.String()

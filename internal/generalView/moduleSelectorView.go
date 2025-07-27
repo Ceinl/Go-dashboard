@@ -38,16 +38,15 @@ func (d moduleDelegate) Render(w io.Writer, m list.Model, index int, listItem li
 
 	str := fmt.Sprintf("%s %s", checkbox, i.name)
 
-	fn := func(s ...string) string {
-		return lipgloss.NewStyle().PaddingLeft(4).Render(s...)
-	}
+	var line string
 	if index == m.Index() {
-		fn = func(s ...string) string {
-			return lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170")).Render("> " + s[0])
-		}
+		line = "> " + str
+		line = lipgloss.NewStyle().Foreground(lipgloss.Color("170")).Render(line)
+	} else {
+		line = "  " + str
 	}
 
-	fmt.Fprint(w, fn(str))
+	fmt.Fprint(w, line)
 }
 
 type ModuleSelectorView struct {
