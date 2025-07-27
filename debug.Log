@@ -22,3 +22,99 @@ debug 2025/07/25 23:26:33 could not open a new TTY: open /dev/tty: no such devic
 debug 2025/07/25 23:27:36 could not open a new TTY: open /dev/tty: no such device or address
 debug 2025/07/25 23:27:44 program was killed: program experienced a panic
 debug 2025/07/25 23:28:46 program was killed: program experienced a panic
+debug 2025/07/26 10:07:03 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 10:08:01 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 10:37:20 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 11:04:39 Error loading config: EOF. Using defaults.
+debug 2025/07/26 11:38:10 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 11:52:24 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 12:03:33 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 12:27:08 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 12:30:38 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 12:35:23 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:01:06 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:01:12 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:06:05 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:06:10 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:06:23 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:06:33 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:08:14 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:16:30 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:16:42 Error getting all projects: no such column: active_modules
+debug 2025/07/26 18:25:44 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:56:47 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 18:59:27 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 20:23:45 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 20:26:42 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 20:28:57 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 20:56:05 Error getting all projects: no such column: active_modules
+debug 2025/07/26 20:56:13 Error getting all projects: no such column: active_modules
+debug 2025/07/26 20:56:17 Error getting all projects: no such column: active_modules
+debug 2025/07/26 20:56:26 Error getting all projects: no such column: active_modules
+debug 2025/07/26 20:56:49 Error getting all projects: no such column: active_modules
+debug 2025/07/26 21:04:54 Error getting all projects: no such column: active_modules
+debug 2025/07/26 21:34:33 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 21:54:28 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 21:57:53 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:00:33 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:02:54 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:04:56 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:07:35 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:09:54 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:37:15 Error getting all projects: no such column: active_modules
+debug 2025/07/26 22:37:24 Error getting all projects: no such column: active_modules
+debug 2025/07/26 22:37:27 Error creating project: table projects has no column named active_modules
+debug 2025/07/26 22:37:27 Error getting all projects: no such column: active_modules
+debug 2025/07/26 22:37:32 Error creating project: table projects has no column named active_modules
+debug 2025/07/26 22:37:32 Error getting all projects: no such column: active_modules
+debug 2025/07/26 22:38:08 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:38:37 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:41:24 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:43:34 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:45:16 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:46:21 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:47:25 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:48:38 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:50:30 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:51:57 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:54:31 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:55:25 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:58:31 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 22:59:45 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:02:09 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:04:49 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:05:43 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:13:24 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:17:02 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:20:29 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:25:54 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:28:44 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:31:59 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:34:08 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:36:17 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/26 23:38:37 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 00:56:15 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:06:07 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:09:47 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:13:02 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:16:11 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:35:24 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:36:02 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:36:10 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:39:47 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 01:40:04 Error creating project: FOREIGN KEY constraint failed
+debug 2025/07/27 01:44:33 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:12:53 Running migration: adding active_modules to workspaces table
+debug 2025/07/27 02:12:58 failed to initialize database: database is locked
+debug 2025/07/27 02:13:14 Running migration: adding active_modules to workspaces table
+debug 2025/07/27 02:13:19 failed to initialize database: database is locked
+debug 2025/07/27 02:13:23 Running migration: adding active_modules to workspaces table
+debug 2025/07/27 02:13:28 failed to initialize database: database is locked
+debug 2025/07/27 02:13:40 Running migration: adding active_modules to workspaces table
+debug 2025/07/27 02:13:45 failed to initialize database: database is locked
+debug 2025/07/27 02:15:01 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:19:11 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:21:58 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:27:27 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:29:41 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 02:34:09 could not open a new TTY: open /dev/tty: device not configured

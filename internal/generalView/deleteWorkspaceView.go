@@ -2,43 +2,56 @@ package generalview
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/Ceinl/Go-dashboard/internal/storage"
-	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
+
+type DoneDeleteWorkspaceMsg struct{}
+type ConfirmDeleteWorkspaceMsg struct {
+	WorkspaceID string
+}
 
 type DeleteWorkspaceView struct {
 	Width  int
 	Height int
 
-	db *sql.DB
-
-	nameInput textinput.Model
-	focused   int    // 0 for name, 1 for OK button
-	status    string // To display messages like "Workspace deleted" or "Not found"
+	db   *sql.DB
+	list list.Model
 }
-
-// A message to signal that the workspace deletion is done/cancelled.
-type DoneDeleteWorkspaceMsg struct{}
 
 func NewDeleteWorkspaceView(db *sql.DB) DeleteWorkspaceView {
 	v := DeleteWorkspaceView{
 		db: db,
 	}
-	v.nameInput = textinput.New()
-	v.nameInput.Placeholder = "Workspace Name to Delete"
-	v.nameInput.Focus()
-	v.nameInput.CharLimit = 50
-	v.nameInput.Width = 30
+
+	items := []list.Item{}
+	workspaces, err := storage.GetAllWorkspaces(db)
+	if err != nil {
+		// TODO: Handle error
+	} else {
+		for _, ws := range workspaces {
+			items = append(items, item{workspace: ws})
+		}
+	}
+
+	m := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	m.Title = "Select a Workspace to Delete"
+	m.SetShowStatusBar(false)
+	m.SetFilteringEnabled(true)
+	m.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Background(lipgloss.Color("235"))
+	m.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
+	m.Styles.HelpStyle = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
+
+	v.list = m
 
 	return v
 }
 
 func (v DeleteWorkspaceView) Init() tea.Cmd {
-	return textinput.Blink
+	return nil
 }
 
 func (v DeleteWorkspaceView) Update(msg tea.Msg) (DeleteWorkspaceView, tea.Cmd) {
@@ -48,113 +61,28 @@ func (v DeleteWorkspaceView) Update(msg tea.Msg) (DeleteWorkspaceView, tea.Cmd) 
 	case tea.WindowSizeMsg:
 		v.Width = msg.Width + 2
 		v.Height = msg.Height + 2
-		v.nameInput.Width = msg.Width / 3
+		v.list.SetSize(msg.Width, msg.Height-2)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc":
 			return v, func() tea.Msg { return DoneDeleteWorkspaceMsg{} }
-		case "tab", "shift+tab":
-			if msg.String() == "shift+tab" {
-				v.focused--
-			} else {
-				v.focused++
-			}
-
-			if v.focused > 1 {
-				v.focused = 0
-			} else if v.focused < 0 {
-				v.focused = 1
-			}
-
-			cmds = append(cmds, v.updateFocus())
-			return v, tea.Batch(cmds...)
 		case "enter":
-			if v.focused == 1 {
-				// Attempt to delete workspace
-				workspaceName := v.nameInput.Value()
-				if workspaceName == "" {
-					v.status = "Please enter a workspace name."
-					return v, nil
+			selItem, ok := v.list.SelectedItem().(item)
+			if ok {
+				return v, func() tea.Msg {
+					return ConfirmDeleteWorkspaceMsg{WorkspaceID: selItem.workspace.ID}
 				}
-
-				ws, err := storage.GetWorkspaceByName(v.db, workspaceName)
-				if err != nil {
-					if err == sql.ErrNoRows {
-						v.status = fmt.Sprintf("Workspace '%s' not found.", workspaceName)
-					} else {
-						v.status = fmt.Sprintf("Error finding workspace: %v", err)
-					}
-					return v, nil
-				}
-
-				err = storage.DeleteWorkspace(v.db, ws.ID)
-				if err != nil {
-					v.status = fmt.Sprintf("Error deleting workspace: %v", err)
-				} else {
-					v.status = fmt.Sprintf("Workspace '%s' deleted successfully.", workspaceName)
-					// Clear input after successful deletion
-					v.nameInput.SetValue("")
-				}
-				return v, nil
-			} else {
-				v.focused++
-				cmds = append(cmds, v.updateFocus())
-				return v, tea.Batch(cmds...)
 			}
-		}
-		// If not a special key, pass to the currently focused text input
-		var inputCmd tea.Cmd
-		if v.focused == 0 {
-			v.nameInput, inputCmd = v.nameInput.Update(msg)
-		}
-		if inputCmd != nil {
-			cmds = append(cmds, inputCmd)
 		}
 	}
+
+	var cmd tea.Cmd
+	v.list, cmd = v.list.Update(msg)
+	cmds = append(cmds, cmd)
 
 	return v, tea.Batch(cmds...)
 }
 
-func (v *DeleteWorkspaceView) updateFocus() tea.Cmd {
-	cmds := make([]tea.Cmd, 2)
-	switch v.focused {
-	case 0:
-		cmds[0] = v.nameInput.Focus()
-	case 1:
-		v.nameInput.Blur()
-	}
-	return tea.Batch(cmds...)
-}
-
 func (v DeleteWorkspaceView) View() string {
-	buttonStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("0")).
-		Background(lipgloss.Color("7")).
-		Padding(0, 3)
-
-	if v.focused == 1 {
-		buttonStyle = buttonStyle.Copy().
-			Foreground(lipgloss.Color("7")).
-			Background(lipgloss.Color("0"))
-	}
-
-	deleteButton := buttonStyle.Render("Delete")
-
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		"Delete Workspace",
-		v.nameInput.View(),
-		"",
-		deleteButton,
-		"",
-		v.status,
-	)
-
-	box := lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("63")).
-		Padding(2, 4). // Increased padding for bigger wizard
-		Render(content)
-
-	return lipgloss.Place(v.Width, v.Height, lipgloss.Center, lipgloss.Center, box)
+	return lipgloss.Place(v.Width, v.Height, lipgloss.Center, lipgloss.Center, v.list.View())
 }

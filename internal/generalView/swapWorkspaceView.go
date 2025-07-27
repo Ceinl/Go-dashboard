@@ -24,27 +24,19 @@ func (i item) Title() string {
 }
 
 func (i item) Description() string {
-	return fmt.Sprintf("ID: %s, Color: %s, Created At: %s", i.workspace.ID, i.workspace.Color, i.workspace.CreatedAt)
+	return fmt.Sprintf("Name: %s", i.workspace.Name)
 }
 
 type SwapWorkspaceView struct {
-	Width  int
-	Height int
-
-	db   *sql.DB
 	list list.Model
+	db   *sql.DB
 }
 
-// A message to signal that the workspace swap is done/cancelled.
 type DoneSwapWorkspaceMsg struct {
 	SelectedWorkspace storage.Workspace
 }
 
 func NewSwapWorkspaceView(db *sql.DB) SwapWorkspaceView {
-	v := SwapWorkspaceView{
-		db: db,
-	}
-
 	items := []list.Item{}
 	workspaces, err := storage.GetAllWorkspaces(db)
 	if err != nil {
@@ -55,17 +47,11 @@ func NewSwapWorkspaceView(db *sql.DB) SwapWorkspaceView {
 		}
 	}
 
-	m := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	delegate := list.NewDefaultDelegate()
+	m := list.New(items, delegate, 20, 20)
 	m.Title = "Select a Workspace"
-	m.SetShowStatusBar(false)
-	m.SetFilteringEnabled(true)
-	m.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Background(lipgloss.Color("235"))
-	m.Styles.PaginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
-	m.Styles.HelpStyle = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 
-	v.list = m
-
-	return v
+	return SwapWorkspaceView{list: m, db: db}
 }
 
 func (v SwapWorkspaceView) Init() tea.Cmd {
@@ -73,32 +59,23 @@ func (v SwapWorkspaceView) Init() tea.Cmd {
 }
 
 func (v SwapWorkspaceView) Update(msg tea.Msg) (SwapWorkspaceView, tea.Cmd) {
-	var cmds []tea.Cmd
-
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		v.Width = msg.Width + 2
-		v.Height = msg.Height + 2
-		v.list.SetSize(msg.Width, msg.Height-2)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc":
 			return v, func() tea.Msg { return DoneSwapWorkspaceMsg{} }
 		case "enter":
-			selItem, ok := v.list.SelectedItem().(item)
-			if ok {
-				return v, func() tea.Msg { return DoneSwapWorkspaceMsg{SelectedWorkspace: selItem.workspace} }
+			if i, ok := v.list.SelectedItem().(item); ok {
+				return v, func() tea.Msg { return DoneSwapWorkspaceMsg{SelectedWorkspace: i.workspace} }
 			}
 		}
 	}
 
 	var cmd tea.Cmd
 	v.list, cmd = v.list.Update(msg)
-	cmds = append(cmds, cmd)
-
-	return v, tea.Batch(cmds...)
+	return v, cmd
 }
 
 func (v SwapWorkspaceView) View() string {
-	return lipgloss.Place(v.Width, v.Height, lipgloss.Center, lipgloss.Center, v.list.View())
+	return lipgloss.NewStyle().Margin(1, 2).Render(v.list.View())
 }

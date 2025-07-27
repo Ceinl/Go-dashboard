@@ -1,9 +1,10 @@
 package module
 
-var Modules = map[string]Module{}
+import tea "github.com/charmbracelet/bubbletea"
 
-type Module struct{}
-
-func init() {
-	Modules["module1"] = Module{} // TODO: Change for actual module
+// Module defines the interface for all modules.
+type Module interface {
+	Init() tea.Cmd
+	Update(msg tea.Msg) (Module, tea.Cmd)
+	View() string
 }

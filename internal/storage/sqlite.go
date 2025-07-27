@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -18,7 +19,8 @@ func InitDB(filepath string) (*sql.DB, error) {
 		id TEXT NOT NULL PRIMARY KEY,
 		name TEXT,
 		color TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		active_modules TEXT
 	);
 	CREATE TABLE IF NOT EXISTS projects (
 		id TEXT NOT NULL PRIMARY KEY,
@@ -26,7 +28,15 @@ func InitDB(filepath string) (*sql.DB, error) {
 		name TEXT,
 		description TEXT,
 		status TEXT,
+		active_modules TEXT,
 		FOREIGN KEY(workspace_id) REFERENCES workspaces(id)
+	);
+	CREATE TABLE IF NOT EXISTS links (
+		id TEXT NOT NULL PRIMARY KEY,
+		project_id TEXT NOT NULL,
+		title TEXT,
+		url TEXT,
+		FOREIGN KEY(project_id) REFERENCES projects(id)
 	);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -34,32 +44,98 @@ func InitDB(filepath string) (*sql.DB, error) {
 		return nil, err
 	}
 
+	// Run migrations
+	if err := runMigrations(db); err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
+func runMigrations(db *sql.DB) error {
+	// Check if the active_modules column exists in projects
+	rows, err := db.Query("PRAGMA table_info(projects)")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var columnExists bool
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, dtype, dflt_value sql.NullString
+		if err := rows.Scan(&cid, &name, &dtype, &notnull, &dflt_value, &pk); err != nil {
+			return err
+		}
+		if name.Valid && name.String == "active_modules" {
+			columnExists = true
+			break
+		}
+	}
+
+	if !columnExists {
+		log.Println("Running migration: adding active_modules to projects table")
+		_, err := db.Exec("ALTER TABLE projects ADD COLUMN active_modules TEXT")
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check if the active_modules column exists in workspaces
+	rows, err = db.Query("PRAGMA table_info(workspaces)")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	columnExists = false
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, dtype, dflt_value sql.NullString
+		if err := rows.Scan(&cid, &name, &dtype, &notnull, &dflt_value, &pk); err != nil {
+			return err
+		}
+		if name.Valid && name.String == "active_modules" {
+			columnExists = true
+			break
+		}
+	}
+
+	if !columnExists {
+		log.Println("Running migration: adding active_modules to workspaces table")
+		_, err := db.Exec("ALTER TABLE workspaces ADD COLUMN active_modules TEXT")
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type Workspace struct {
-	ID        string
-	Name      string
-	Color     string
-	CreatedAt string
+	ID            string
+	Name          string
+	Color         string
+	CreatedAt     string
+	ActiveModules string
 }
 
 func CreateWorkspace(db *sql.DB, workspace Workspace) error {
-	stmt, err := db.Prepare("INSERT INTO workspaces(id, name, color) VALUES(?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO workspaces(id, name, color, active_modules) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(workspace.ID, workspace.Name, workspace.Color)
+	_, err = stmt.Exec(workspace.ID, workspace.Name, workspace.Color, workspace.ActiveModules)
 	return err
 }
 
 func GetWorkspace(db *sql.DB, id string) (Workspace, error) {
-	row := db.QueryRow("SELECT id, name, color, created_at FROM workspaces WHERE id = ?", id)
+	row := db.QueryRow("SELECT id, name, color, created_at, active_modules FROM workspaces WHERE id = ?", id)
 
 	var workspace Workspace
-	err := row.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt)
+	err := row.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt, &workspace.ActiveModules)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -68,13 +144,13 @@ func GetWorkspace(db *sql.DB, id string) (Workspace, error) {
 }
 
 func UpdateWorkspace(db *sql.DB, workspace Workspace) error {
-	stmt, err := db.Prepare("UPDATE workspaces SET name = ?, color = ? WHERE id = ?")
+	stmt, err := db.Prepare("UPDATE workspaces SET name = ?, color = ?, active_modules = ? WHERE id = ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(workspace.Name, workspace.Color, workspace.ID)
+	_, err = stmt.Exec(workspace.Name, workspace.Color, workspace.ActiveModules, workspace.ID)
 	return err
 }
 
@@ -90,7 +166,7 @@ func DeleteWorkspace(db *sql.DB, id string) error {
 }
 
 func GetAllWorkspaces(db *sql.DB) ([]Workspace, error) {
-	rows, err := db.Query("SELECT id, name, color, created_at FROM workspaces")
+	rows, err := db.Query("SELECT id, name, color, created_at, active_modules FROM workspaces")
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +175,7 @@ func GetAllWorkspaces(db *sql.DB) ([]Workspace, error) {
 	var workspaces []Workspace
 	for rows.Next() {
 		var workspace Workspace
-		if err := rows.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt); err != nil {
+		if err := rows.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt, &workspace.ActiveModules); err != nil {
 			return nil, err
 		}
 		workspaces = append(workspaces, workspace)
@@ -109,13 +185,115 @@ func GetAllWorkspaces(db *sql.DB) ([]Workspace, error) {
 }
 
 func GetWorkspaceByName(db *sql.DB, name string) (Workspace, error) {
-	row := db.QueryRow("SELECT id, name, color, created_at FROM workspaces WHERE name = ?", name)
+	row := db.QueryRow("SELECT id, name, color, created_at, active_modules FROM workspaces WHERE name = ?", name)
 
 	var workspace Workspace
-	err := row.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt)
+	err := row.Scan(&workspace.ID, &workspace.Name, &workspace.Color, &workspace.CreatedAt, &workspace.ActiveModules)
 	if err != nil {
 		return Workspace{}, err
 	}
 
 	return workspace, nil
+}
+
+// Project represents a project within a workspace
+type Project struct {
+	ID            string
+	WorkspaceID   string
+	Name          string
+	Description   string
+	Status        string
+	ActiveModules string // Stored as a comma-separated string
+}
+
+// CreateProject adds a new project to the database
+func CreateProject(db *sql.DB, project Project) error {
+	stmt, err := db.Prepare("INSERT INTO projects(id, workspace_id, name, description, status, active_modules) VALUES(?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(project.ID, project.WorkspaceID, project.Name, project.Description, project.Status, project.ActiveModules)
+	return err
+}
+
+// UpdateProject updates a project in the database
+func UpdateProject(db *sql.DB, project Project) error {
+	stmt, err := db.Prepare("UPDATE projects SET name = ?, description = ?, status = ?, active_modules = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(project.Name, project.Description, project.Status, project.ActiveModules, project.ID)
+	return err
+}
+
+// GetAllProjectsForWorkspace retrieves all projects for a given workspace
+func GetAllProjectsForWorkspace(db *sql.DB, workspaceID string) ([]Project, error) {
+	rows, err := db.Query("SELECT id, workspace_id, name, description, status, active_modules FROM projects WHERE workspace_id = ?", workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var projects []Project
+	for rows.Next() {
+		var project Project
+		if err := rows.Scan(&project.ID, &project.WorkspaceID, &project.Name, &project.Description, &project.Status, &project.ActiveModules); err != nil {
+			return nil, err
+		}
+		projects = append(projects, project)
+	}
+
+	return projects, nil
+}
+
+type Link struct {
+	ID        string
+	ProjectID string
+	Title     string
+	URL       string
+}
+
+func GetLinksForProject(db *sql.DB, projectID string) ([]Link, error) {
+	rows, err := db.Query("SELECT id, project_id, title, url FROM links WHERE project_id = ?", projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var links []Link
+	for rows.Next() {
+		var link Link
+		if err := rows.Scan(&link.ID, &link.ProjectID, &link.Title, &link.URL); err != nil {
+			return nil, err
+		}
+		links = append(links, link)
+	}
+
+	return links, nil
+}
+
+func CreateLink(db *sql.DB, link Link) error {
+	stmt, err := db.Prepare("INSERT INTO links(id, project_id, title, url) VALUES(?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(link.ID, link.ProjectID, link.Title, link.URL)
+	return err
+}
+
+func DeleteLink(db *sql.DB, id string) error {
+	stmt, err := db.Prepare("DELETE FROM links WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	return err
 }

@@ -112,15 +112,14 @@ func (v CreateWorkspaceView) Update(msg tea.Msg) (CreateWorkspaceView, tea.Cmd) 
 }
 
 func (v *CreateWorkspaceView) updateFocus() tea.Cmd {
-	cmds := make([]tea.Cmd, 3)
-	switch v.focused {
-	case 0:
+	cmds := make([]tea.Cmd, 2)
+	if v.focused == 0 {
 		cmds[0] = v.nameInput.Focus()
 		v.colorInput.Blur()
-	case 1:
-		cmds[1] = v.colorInput.Focus()
+	} else if v.focused == 1 {
+		cmds[0] = v.colorInput.Focus()
 		v.nameInput.Blur()
-	case 2:
+	} else {
 		v.nameInput.Blur()
 		v.colorInput.Blur()
 	}
