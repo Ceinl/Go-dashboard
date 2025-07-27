@@ -37,20 +37,20 @@ func InitDB(filepath string) (*sql.DB, error) {
 		project_id TEXT NOT NULL,
 		title TEXT,
 		url TEXT,
-		FOREIGN KEY(project_id) REFERENCES projects(id)
+		FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 	);
 	CREATE TABLE IF NOT EXISTS tasks (
 		id TEXT NOT NULL PRIMARY KEY,
 		project_id TEXT NOT NULL,
 		title TEXT,
 		status TEXT,
-		FOREIGN KEY(project_id) REFERENCES projects(id)
+		FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 	);
 	CREATE TABLE IF NOT EXISTS tweets (
 		id TEXT NOT NULL PRIMARY KEY,
 		project_id TEXT NOT NULL,
 		content TEXT,
-		FOREIGN KEY(project_id) REFERENCES projects(id)
+		FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 	);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -263,6 +263,19 @@ func GetAllProjectsForWorkspace(db *sql.DB, workspaceID string) ([]Project, erro
 
 	return projects, nil
 }
+
+// DeleteProject deletes a project from the database
+func DeleteProject(db *sql.DB, id string) error {
+	stmt, err := db.Prepare("DELETE FROM projects WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	return err
+}
+
 
 type Link struct {
 	ID        string

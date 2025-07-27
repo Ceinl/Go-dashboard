@@ -134,3 +134,7 @@ debug 2025/07/27 03:43:12 could not open a new TTY: open /dev/tty: device not co
 debug 2025/07/27 03:44:45 could not open a new TTY: open /dev/tty: device not configured
 debug 2025/07/27 03:45:48 could not open a new TTY: open /dev/tty: device not configured
 debug 2025/07/27 03:48:37 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 03:56:46 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 04:00:10 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 04:01:29 could not open a new TTY: open /dev/tty: device not configured
+debug 2025/07/27 04:02:38 could not open a new TTY: open /dev/tty: device not configured

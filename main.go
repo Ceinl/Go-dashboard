@@ -14,7 +14,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// AppConfig holds the application's configuration
 type AppConfig struct {
 	LastActiveWorkspaceID string `json:"last_active_workspace_id"`
 }
@@ -65,7 +64,6 @@ type model struct {
 }
 
 func (m *model) Init() tea.Cmd {
-	// Try to load the last active workspace from config
 	if m.config.LastActiveWorkspaceID != "" {
 		ws, err := storage.GetWorkspace(m.db, m.config.LastActiveWorkspaceID)
 		if err == nil {
@@ -74,7 +72,6 @@ func (m *model) Init() tea.Cmd {
 		}
 	}
 
-	// If no last active workspace was loaded, fall back to the first one
 	if m.currentWorkspace.ID == "" {
 		workspaces, err := storage.GetAllWorkspaces(m.db)
 		if err != nil {
@@ -240,6 +237,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = workspaceState
 		return m, nil
 	case YesDeleteProjectMsg:
+		storage.DeleteProject(m.db, msg.ID)
 		m.state = projectState
 		m.reloadProjects()
 		return m, nil

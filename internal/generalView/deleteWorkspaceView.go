@@ -33,11 +33,11 @@ func NewDeleteWorkspaceView(db *sql.DB) DeleteWorkspaceView {
 		// TODO: Handle error
 	} else {
 		for _, ws := range workspaces {
-			items = append(items, item{workspace: ws})
+			items = append(items, deleteItem{workspace: ws})
 		}
 	}
 
-	m := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	m := list.New(items, list.NewDefaultDelegate(), 20, 10)
 	m.Title = "Select a Workspace to Delete"
 	m.SetShowStatusBar(false)
 	m.SetFilteringEnabled(true)
@@ -59,15 +59,14 @@ func (v DeleteWorkspaceView) Update(msg tea.Msg) (DeleteWorkspaceView, tea.Cmd) 
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		v.Width = msg.Width + 2
-		v.Height = msg.Height + 2
-		v.list.SetSize(msg.Width, msg.Height-2)
+		v.Width = msg.Width
+		v.Height = msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc":
 			return v, func() tea.Msg { return DoneDeleteWorkspaceMsg{} }
 		case "enter":
-			selItem, ok := v.list.SelectedItem().(item)
+			selItem, ok := v.list.SelectedItem().(deleteItem)
 			if ok {
 				return v, func() tea.Msg {
 					return ConfirmDeleteWorkspaceMsg{WorkspaceID: selItem.workspace.ID}
@@ -84,5 +83,25 @@ func (v DeleteWorkspaceView) Update(msg tea.Msg) (DeleteWorkspaceView, tea.Cmd) 
 }
 
 func (v DeleteWorkspaceView) View() string {
-	return lipgloss.Place(v.Width, v.Height, lipgloss.Center, lipgloss.Center, v.list.View())
+	content := lipgloss.JoinVertical(
+		lipgloss.Left,
+		"Delete Workspace",
+		v.list.View(),
+	)
+
+	box := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63")).
+		Padding(2, 4).
+		Render(content)
+
+	return lipgloss.Place(v.Width, v.Height, lipgloss.Center, lipgloss.Center, box)
 }
+
+type deleteItem struct {
+	workspace storage.Workspace
+}
+
+func (i deleteItem) Title() string       { return i.workspace.Name }
+func (i deleteItem) Description() string { return i.workspace.Color }
+func (i deleteItem) FilterValue() string { return i.workspace.Name }
